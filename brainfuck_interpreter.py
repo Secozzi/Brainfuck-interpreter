@@ -109,4 +109,4 @@ class Brainfuck:
         return self.memory[memory_pos]
 
 ok = Brainfuck("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.")
-ok.run_code_steps()
+ok.run_code()
