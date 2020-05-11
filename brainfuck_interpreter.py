@@ -1,12 +1,14 @@
 import re
 
 class Brainfuck:
-    def __init__(self, instructions, memory = [0]):
+    def __init__(self, instructions, memory = [0], max_memory_size=None, max_memory_value=None):
         self.instructions = re.sub('[^\+\-<>.,\[\]]', '', instructions)
 
         self.memory = memory
         self.memory_pointer = 0
         self.instruction_pointer = 0
+        self.max_memory_size = max_memory_size
+        self.max_memory_value = max_memory_value
 
         self.bracket_pairs = self.find_bracket_pairs()
         self.inverse_bracket_pairs = {a: b for b,a in self.bracket_pairs.items()}
@@ -51,7 +53,7 @@ class Brainfuck:
     def run_code_steps(self):
         print("To go to the next step, press ENTER")
         while self.instruction_pointer < len(self.instructions):
-            ok = input("")
+            _ = input("")
             func = getattr(self, self.MAPPINGS.get(self.instructions[self.instruction_pointer]))
 
             if func:
@@ -61,7 +63,13 @@ class Brainfuck:
             print(self.memory)
 
     def add(self):
-        self.memory[self.memory_pointer] += 1
+        if self.max_memory_value:
+            if self.memory[self.memory_pointer] == self.max_memory_value:
+                self.memory[self.memory_pointer] = 0
+            else:
+                self.memory[self.memory_pointer] += 1
+        else:
+            self.memory[self.memory_pointer] += 1
 
     def subtract(self):
         self.memory[self.memory_pointer] -= 1
@@ -71,10 +79,18 @@ class Brainfuck:
             self.memory_pointer -= 1
 
     def increment_pointer(self):
-        if self.memory_pointer == len(self.memory) - 1:
-            self.memory.append(0)
+        if self.max_memory_size:
+            if self.memory_pointer == self.max_memory_size:
+                self.memory_pointer = 0
+            else:
+                if self.memory_pointer == len(self.memory) - 1:
+                    self.memory.append(0)
+                self.memory_pointer += 1
+        else:
+            if self.memory_pointer == len(self.memory) - 1:
+                self.memory.append(0)
 
-        self.memory_pointer += 1
+            self.memory_pointer += 1
 
     def output(self):
         print(chr(self.memory[self.memory_pointer]), end="")
@@ -108,5 +124,6 @@ class Brainfuck:
     def __getitem__(self, memory_pos):
         return self.memory[memory_pos]
 
-ok = Brainfuck("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.")
-ok.run_code()
+ok = Brainfuck(">>>>++++", max_memory_size=2, max_memory_value=2)
+ok.run_code_steps()
+print(ok)
